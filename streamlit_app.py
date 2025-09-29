@@ -9,7 +9,7 @@ import streamlit as st
 APP_TITLE = "Cologne AI Buildathon — Oct 18"
 EVENT_DATE = "October 18, 2025"
 EVENT_CITY = "Cologne, Germany"
-EVENT_TAGLINE = "A one-day sprint to build AI apps, inspired by the Menlo Park buildathon"
+EVENT_TAGLINE = "A one-day sprint to build AI apps"
 REGISTRATION_LIMIT = 30
 
 
