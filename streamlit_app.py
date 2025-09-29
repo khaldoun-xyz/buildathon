@@ -64,7 +64,7 @@ def render_hero():
         st.write("")
         st.link_button("RSVP Now", "#rsvp", type="primary")
     with col2:
-        st.metric("Target participants", f"{REGISTRATION_LIMIT}+")
+        st.metric("Target participants", f"{REGISTRATION_LIMIT}")
 
 
 def render_agenda():
