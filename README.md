@@ -28,3 +28,20 @@ streamlit run streamlit_app.py
 - RSVP CSV file is created automatically on first submission.
 - To clear RSVPs, delete `data/rsvps.csv`.
 
+### Docker
+
+Build and run locally:
+
+```bash
+docker build -t cologne-buildathon .
+docker run --rm -p 8080:8080 cologne-buildathon
+```
+
+Visit http://localhost:8080
+
+### DigitalOcean App Platform
+
+- Select “Container” and point to this repo; it will autodetect `Dockerfile`.
+- Ensure HTTP port is set to `8080` (App Platform injects `$PORT`, which the image respects).
+- No custom start command needed. Health checks will pass once Streamlit is up.
+
