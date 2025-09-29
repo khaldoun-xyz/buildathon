@@ -140,7 +140,6 @@ def main():
     render_header()
     render_hero()
     render_agenda()
-    render_partners()
     render_faq()
     render_rsvp()
     render_contact()
