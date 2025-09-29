@@ -10,7 +10,7 @@ APP_TITLE = "Cologne AI Buildathon — Oct 18"
 EVENT_DATE = "October 18, 2025"
 EVENT_CITY = "Cologne, Germany"
 EVENT_TAGLINE = "A one-day sprint to build AI apps, inspired by the Menlo Park buildathon"
-REGISTRATION_LIMIT = 200
+REGISTRATION_LIMIT = 30
 
 
 def ensure_data_dir() -> Path:
@@ -65,31 +65,21 @@ def render_hero():
         st.link_button("RSVP Now", "#rsvp", type="primary")
     with col2:
         st.metric("Target participants", f"{REGISTRATION_LIMIT}+")
-        rsvps = load_rsvps()
-        st.metric("RSVPs so far", len(rsvps))
-        st.progress(min(len(rsvps) / max(REGISTRATION_LIMIT, 1), 1.0))
 
 
 def render_agenda():
     st.markdown("---")
     st.header("Agenda")
     agenda = [
-        ("09:00", "Check-in, coffee, team formation"),
+        ("09:00", "Check-in, coffee"),
         ("10:00", "Kickoff and problem pitches"),
-        ("10:30", "Building sprint"),
-        ("13:00", "Lunch break"),
-        ("14:00", "Building sprint resumes"),
+        ("10:30", "Tips on using AI assistants"),
+        ("11:00", "Building starts"),
         ("17:00", "Demos"),
-        ("18:00", "Judging and closing"),
+        ("18:00", "Group vote and closing"),
     ]
     for time_str, item in agenda:
         st.markdown(f"**{time_str}** — {item}")
-
-
-def render_partners():
-    st.markdown("---")
-    st.header("Partners & Community")
-    st.caption("Interested in sponsoring or hosting? Get in touch below.")
 
 
 def render_faq():
@@ -107,7 +97,7 @@ def render_contact():
     st.markdown("---")
     st.header("Contact")
     st.write("Questions or sponsorship inquiries: email ")
-    st.code("organizers@cologne-buildathon.org")
+    st.code("alex.gansmann@hey.com")
 
 
 def render_rsvp():
