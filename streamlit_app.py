@@ -1,4 +1,5 @@
 import os
+from io import StringIO
 from datetime import datetime
 from pathlib import Path
 
@@ -9,8 +10,8 @@ import streamlit as st
 APP_TITLE = "Cologne AI Buildathon — Oct 18"
 EVENT_DATE = "October 18, 2025"
 EVENT_CITY = "Cologne, Germany"
-EVENT_TAGLINE = "A one-day sprint to build AI apps"
-REGISTRATION_LIMIT = 30
+EVENT_TAGLINE = "Build a software product in one day."
+REGISTRATION_LIMIT = 20
 
 
 def ensure_data_dir() -> Path:
@@ -29,8 +30,8 @@ def load_rsvps() -> pd.DataFrame:
         try:
             return pd.read_csv(csv_path)
         except Exception:
-            return pd.DataFrame(columns=["timestamp", "name", "email", "affiliation", "role", "interests"]) 
-    return pd.DataFrame(columns=["timestamp", "name", "email", "affiliation", "role", "interests"]) 
+            return pd.DataFrame(columns=["timestamp", "name", "email", "phone", "inviter"]) 
+    return pd.DataFrame(columns=["timestamp", "name", "email", "phone", "inviter"]) 
 
 
 def append_rsvp(record: dict) -> None:
@@ -53,18 +54,85 @@ def render_hero():
     with col1:
         st.markdown(
             """
-            Join developers, researchers, product builders, and students for a focused day of rapid prototyping.
-            Bring an idea, form a team, ship an MVP by evening. Demos, feedback, and community — all in one day.
+            We invite you to join us in this one-day challenge.  
+            Out of 5 product specifications, we will try to build as many 
+            products as we can within 6 hours.
             """
         )
-        st.markdown("- Hands-on building, not talks")
-        st.markdown("- Team up or go solo")
-        st.markdown("- Demos and prizes at the end")
-        st.markdown("- All skill levels welcome")
-        st.write("")
-        st.link_button("RSVP Now", "#rsvp", type="primary")
+        st.markdown("- Get free access to AI coding assistants.")
+        st.markdown("- Build & deploy as many products as you can in 6 hours.")
+        st.markdown("- Go solo or join a team.")
+        st.markdown("- No preparation required. Just come and have fun.")
     with col2:
-        st.metric("Target participants", f"{REGISTRATION_LIMIT}")
+        current = len(load_rsvps())
+        seats_left = max(REGISTRATION_LIMIT - current, 0)
+        st.metric("Seats left", f"{seats_left}")
+
+def render_rsvp():
+    st.header("Reserve your spot now")
+    st.markdown("<a id='rsvp'></a>", unsafe_allow_html=True)
+
+    # Try to get passphrase from secrets first, then environment
+    expected_pass = ""
+    try:
+        if hasattr(st, "secrets") and st.secrets:
+            expected_pass = st.secrets.get("INVITE_PASSPHRASE", "")
+    except Exception:
+        pass
+    
+    if not expected_pass:
+        expected_pass = os.getenv("INVITE_PASSPHRASE", "")
+    
+    expected_pass = expected_pass.strip()
+
+    if not expected_pass:
+        st.info("Registration is currently closed. Organisers have not enabled invites yet.")
+        return
+
+    if "invite_ok" not in st.session_state:
+        st.session_state["invite_ok"] = False
+
+    st.text_input("Invite passphrase", type="password", key="invite_pass_input")
+    if st.button("Verify invite"):
+        entered = (st.session_state.get("invite_pass_input") or "").strip()
+        if entered == expected_pass:
+            st.session_state["invite_ok"] = True
+            st.success("Invite confirmed. Registration unlocked below.")
+        else:
+            st.session_state["invite_ok"] = False
+            st.error("Incorrect code. Please try again or contact the organisers.")
+
+    rsvps = load_rsvps()
+    if len(rsvps) >= REGISTRATION_LIMIT:
+        st.warning("RSVPs have reached capacity. You can still join the waitlist.")
+
+    if not st.session_state.get("invite_ok"):
+        st.info("Enter your invite code to register.")
+        return
+
+    with st.form("rsvp_form", clear_on_submit=True):
+        name = st.text_input("Full name", placeholder="Ada Lovelace")
+        email = st.text_input("Email", placeholder="ada@example.com")
+        phone = st.text_input("Phone number")
+        inviter = st.text_input("Who invited you to this event?")
+        submitted = st.form_submit_button("Submit")
+
+        if submitted:
+            if not name or not email or not phone:
+                st.error("Please provide name, email, and phone number.")
+            else:
+                record = {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "name": name.strip(),
+                    "email": email.strip().lower(),
+                    "phone": phone.strip(),
+                    "inviter": inviter.strip(),
+                }
+                try:
+                    append_rsvp(record)
+                    st.success("Thanks! We'll be in touch with details.")
+                except Exception as e:
+                    st.error(f"Could not save your RSVP: {e}")
 
 
 def render_agenda():
@@ -72,8 +140,8 @@ def render_agenda():
     st.header("Agenda")
     agenda = [
         ("09:00", "Check-in, coffee"),
-        ("10:00", "Kickoff and problem pitches"),
-        ("10:30", "Tips on using AI assistants"),
+        ("09:30", "Kickoff"),
+        ("10:00", "Tips on using AI assistants"),
         ("11:00", "Building starts"),
         ("17:00", "Demos"),
         ("18:00", "Group vote and closing"),
@@ -85,63 +153,112 @@ def render_agenda():
 def render_faq():
     st.markdown("---")
     st.header("FAQ")
-    with st.expander("Who should attend?"):
-        st.write("Builders of all kinds: engineers, designers, PMs, researchers, students.")
+    with st.expander("Why this event?"):
+        st.write("""AI is changing how we work. We feel it.
+            What used to take us a day, we now complete within an hour.
+            Yet, AI coding assistants and all the tools surrounding them
+            are changing so rapidly that we want to take some time to play around
+            with new developments and catch up on new ideas.
+            The original inspiration for this event is the Buildathon 
+            that took place in California in August 2025 (https://www.buildathon.ai/).
+            """)
+    with st.expander("Where will the event take place?"):
+        st.write("""We're still in the process of figuring that out. 
+            The event will definitely take place in Cologne or a place very close to Cologne.
+            We'll send you the exact location before the event.""")
     with st.expander("Do I need a team?"):
         st.write("No. Team formation happens on the day, and solo builders are welcome.")
     with st.expander("What should I bring?"):
-        st.write("Laptop, charger, and an idea. We'll handle the rest.")
+        st.write("Laptop, charger and fun. We'll handle the rest.")
+    with st.expander("Do I need to bring a product idea?"):
+        st.write("""No, we provide you with a list of product specifications. 
+            A product specification is a short text description of a product. 
+            It's a list of features and requirements. This is a simplified example: 
+            
+            Create a web app that tracks tasks. 
+            - Constraint: A task can have several states.
+            """)
+    with st.expander("Who are we?"):
+        st.write("""We are data scientists & machine learning specialists 
+            that realise AI projects at work. 
+            The algorithms we deployed have significantly impacted our organisations.""") 
 
-
+    
 def render_contact():
     st.markdown("---")
     st.header("Contact")
-    st.write("Questions or sponsorship inquiries: email ")
+    st.write("Questions? Send an email to Alex:")
     st.code("alex.gansmann@hey.com")
 
 
-def render_rsvp():
+
+def render_registrations():
     st.markdown("---")
-    st.header("RSVP")
-    st.markdown("<a id='rsvp'></a>", unsafe_allow_html=True)
 
-    rsvps = load_rsvps()
-    if len(rsvps) >= REGISTRATION_LIMIT:
-        st.warning("RSVPs have reached capacity. You can still join the waitlist.")
+    # Try secrets first, then environment
+    admin_pass = ""
+    try:
+        if hasattr(st, "secrets") and st.secrets:
+            admin_pass = st.secrets.get("ADMIN_PASSPHRASE", "")
+    except Exception:
+        pass
+    if not admin_pass:
+        admin_pass = os.getenv("ADMIN_PASSPHRASE", "")
+    admin_pass = admin_pass.strip()
 
-    with st.form("rsvp_form", clear_on_submit=True):
-        name = st.text_input("Full name", placeholder="Ada Lovelace")
-        email = st.text_input("Email", placeholder="ada@example.com")
-        affiliation = st.text_input("Affiliation (company/school)")
-        role = st.selectbox("Primary role", ["Engineer", "Researcher", "Designer", "Product", "Student", "Other"])
-        interests = st.text_area("What do you want to build?", height=100)
-        submitted = st.form_submit_button("Submit RSVP")
+    if not admin_pass:
+        st.info("Admin access is disabled. Set ADMIN_PASSPHRASE to enable.")
+        return
 
-        if submitted:
-            if not name or not email:
-                st.error("Please provide at least your name and email.")
-            else:
-                record = {
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "name": name.strip(),
-                    "email": email.strip().lower(),
-                    "affiliation": affiliation.strip(),
-                    "role": role,
-                    "interests": interests.strip(),
-                }
-                try:
-                    append_rsvp(record)
-                    st.success("Thanks! We'll be in touch with details.")
-                except Exception as e:
-                    st.error(f"Could not save your RSVP: {e}")
+    if "admin_ok" not in st.session_state:
+        st.session_state["admin_ok"] = False
+
+    st.text_input("", type="password", key="admin_pass_input")
+    if st.button("Go"):
+        entered = (st.session_state.get("admin_pass_input") or "").strip()
+        st.session_state["admin_ok"] = (entered == admin_pass)
+        if st.session_state["admin_ok"]:
+            st.success("Access granted.")
+        else:
+            st.error("Incorrect admin passphrase.")
+
+    if not st.session_state.get("admin_ok"):
+        return
+
+    df = load_rsvps()
+    st.subheader("Current RSVPs")
+    if df.empty:
+        st.write("No registrations yet.")
+        return
+    st.dataframe(df, use_container_width=True)
+
+    csv_buf = StringIO()
+    df.to_csv(csv_buf, index=False)
+    st.download_button("Download CSV", data=csv_buf.getvalue(), file_name="rsvps.csv", mime="text/csv")
+
 
 
 def main():
+    # Simple routing using query param: ?page=registrations
+    try:
+        params = st.query_params if hasattr(st, "query_params") else st.experimental_get_query_params()
+    except Exception:
+        params = {}
+
+    page_val = params.get("page", "")
+    if isinstance(page_val, list):
+        page_val = page_val[0] if page_val else ""
+    page = (page_val or "").strip().lower()
+
     render_header()
+    if page == "registrations":
+        render_registrations()
+        return
+
     render_hero()
+    render_rsvp()
     render_agenda()
     render_faq()
-    render_rsvp()
     render_contact()
 
 
