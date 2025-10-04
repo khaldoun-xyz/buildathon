@@ -128,13 +128,13 @@ def render_rsvp():
     with st.form("rsvp_form", clear_on_submit=True):
         name = st.text_input("Full name", placeholder="Ada Lovelace")
         email = st.text_input("Email", placeholder="ada@example.com")
-        phone = st.text_input("Phone number")
+        phone = st.text_input("Phone number", placeholder="optional")
         inviter = st.text_input("Who invited you to this event?")
         submitted = st.form_submit_button("Submit")
 
         if submitted:
-            if not name or not email or not phone:
-                st.error("Please provide name, email, and phone number.")
+            if not name or not email:
+                st.error("Please provide name and email.")
             else:
                 record = {
                     "timestamp": datetime.utcnow().isoformat(),
