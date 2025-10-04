@@ -43,7 +43,22 @@ def append_rsvp(record: dict) -> None:
 
 
 def render_header():
-    st.set_page_config(page_title=APP_TITLE, page_icon="🤖", layout="wide")
+    st.set_page_config(
+        page_title="Build with AI in Cologne - Oct 18, 2025", 
+        page_icon="🐒", 
+        layout="wide"
+    )
+    
+    # Add Open Graph meta tags for better social sharing
+    st.markdown("""
+    <meta property="og:title" content="Build with AI in Cologne - Oct 18, 2025">
+    <meta property="og:description" content="Build a software product in one day using AI.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Build with AI in Cologne - Oct 18, 2025">
+    <meta name="twitter:description" content="Build a software product in one day using AI.">
+    """, unsafe_allow_html=True)
+    
     st.title(APP_TITLE)
     st.subheader(f"{EVENT_CITY} · {EVENT_DATE}")
     st.caption(EVENT_TAGLINE)
