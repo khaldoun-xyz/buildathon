@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 
 
-APP_TITLE = "Cologne AI Buildathon — Oct 18"
+APP_TITLE = "Build with AI in Cologne — Oct 18"
 EVENT_DATE = "October 18, 2025"
 EVENT_CITY = "Cologne, Germany"
 EVENT_TAGLINE = "Build a software product in one day."
