@@ -30,8 +30,8 @@ def load_rsvps() -> pd.DataFrame:
         try:
             return pd.read_csv(csv_path)
         except Exception:
-            return pd.DataFrame(columns=["timestamp", "name", "email", "phone", "inviter"]) 
-    return pd.DataFrame(columns=["timestamp", "name", "email", "phone", "inviter"]) 
+            return pd.DataFrame(columns=["timestamp", "name", "email", "phone"]) 
+    return pd.DataFrame(columns=["timestamp", "name", "email", "phone"]) 
 
 
 def append_rsvp(record: dict) -> None:
@@ -129,7 +129,6 @@ def render_rsvp():
         name = st.text_input("Full name", placeholder="Ada Lovelace")
         email = st.text_input("Email", placeholder="ada@example.com")
         phone = st.text_input("Phone number", placeholder="optional")
-        inviter = st.text_input("Who invited you to this event?")
         submitted = st.form_submit_button("Submit")
 
         if submitted:
@@ -141,7 +140,6 @@ def render_rsvp():
                     "name": name.strip(),
                     "email": email.strip().lower(),
                     "phone": phone.strip(),
-                    "inviter": inviter.strip(),
                 }
                 try:
                     append_rsvp(record)
@@ -165,38 +163,49 @@ def render_agenda():
         st.markdown(f"**{time_str}** — {item}")
 
 
+def render_address():
+    st.markdown("---")
+    st.header("Address")
+    st.write("The event will take place in Hürth, a city on the outskirts of Cologne.")
+    st.write("**Location:** Am Römerkanal 8, 50354 Hürth")
+    st.write("- If you come by car, there are free parking spots at Stadion Hürth, Dunantstrasse 6, 50354 Hürth.")
+    st.write("""- If you come by train, we organise a pickup from Cologne main station. 
+        If you're interested in a pickup, let us know (contact details below). 
+        Alternatively, you can take a train to Hürth directly.""")
+
+
 def render_faq():
     st.markdown("---")
     st.header("FAQ")
     with st.expander("Why this event?"):
-        st.write("""AI is changing how we work. We feel it.
-            What used to take us a day, we now complete within an hour.
+        st.write("""AI is changing how we work. What used to take us a day, we can now complete within an hour.
             Yet, AI coding assistants and all the tools surrounding them
             are changing so rapidly that we want to take some time to play around
             with new developments and catch up on new ideas.
             The original inspiration for this event is the Buildathon 
             that took place in California in August 2025 (https://www.buildathon.ai/).
             """)
-    with st.expander("Where will the event take place?"):
-        st.write("""We're still in the process of figuring that out. 
-            The event will definitely take place in Cologne or a place very close to Cologne.
-            We'll send you the exact location before the event.""")
+    with st.expander("Will the event be in English or German?"):
+        st.write("""That depends on the language skills of the participants. 
+            If everybody speaks German, the event will take place in German. 
+            Otherwise in English. So only register if you feel comfortable with English.""")
     with st.expander("Do I need a team?"):
         st.write("No. Team formation happens on the day, and solo builders are welcome.")
     with st.expander("What should I bring?"):
         st.write("Laptop, charger and fun. We'll handle the rest.")
     with st.expander("Do I need to bring a product idea?"):
-        st.write("""No, we provide you with a list of product specifications. 
+        st.write("""No, we provide you with a list of 5 product specifications. 
             A product specification is a short text description of a product. 
             It's a list of features and requirements. This is a simplified example: 
             
             Create a web app that tracks tasks. 
-            - Constraint: A task can have several states.
+            Constraints: 
+            - A task must have at least these states: [open, ongoing, done].
             """)
     with st.expander("Who are we?"):
         st.write("""We are data scientists & machine learning specialists 
             that realise AI projects at work. 
-            The algorithms we deployed have significantly impacted our organisations.""") 
+            Over the years the algorithms we have deployed significantly impacted our organisations.""") 
 
     
 def render_contact():
@@ -204,7 +213,44 @@ def render_contact():
     st.header("Contact")
     st.write("Questions? Send an email to Alex:")
     st.code("alex.gansmann@hey.com")
+    
+    # Add imprint link at the bottom
+    st.markdown("---")
+    st.markdown(
+        '<div style="text-align: center; margin-top: 2rem;">'
+        '<a href="?page=imprint" style="color: #666; text-decoration: none;">Imprint</a>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
+
+def render_imprint():
+    st.markdown("---")
+    st.header("Imprint")
+    
+    st.write("**Organizer:**")
+    st.write("Alex Gansmann")
+    st.write("Email: alex.gansmann@hey.com")
+    
+    st.write("**Event Details:**")
+    st.write("Build with AI in Cologne — Oct 18")
+    st.write("October 18, 2025")
+    st.write("Am Römerkanal 8, 50354 Hürth, Germany")
+    
+    st.write("**Disclaimer:**")
+    st.write("This event is organized on a voluntary basis. Participation is at your own risk. The organizers are not liable for any damages or losses that may occur during the event.")
+    
+    st.write("**Data Protection:**")
+    st.write("We collect and store only the information you provide during registration (name, email, phone number) for the purpose of organizing this event. Your data will not be shared with third parties and will be deleted after the event unless you consent to further contact.")
+    
+    # Back to main page link
+    st.markdown("---")
+    st.markdown(
+        '<div style="text-align: center;">'
+        '<a href="?" style="color: #666; text-decoration: none;">← Back to main page</a>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
 
 def render_registrations():
@@ -269,10 +315,14 @@ def main():
     if page == "registrations":
         render_registrations()
         return
+    elif page == "imprint":
+        render_imprint()
+        return
 
     render_hero()
     render_rsvp()
     render_agenda()
+    render_address()
     render_faq()
     render_contact()
 
